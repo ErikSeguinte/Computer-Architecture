@@ -3,6 +3,11 @@
 import sys
 from pathlib import Path
 
+LDI = 0b10000010 
+MUL = 0b10100010
+PRN = 0b01000111
+HLT = 0b00000001
+
 
 class CPU:
     """Main CPU class."""
@@ -20,9 +25,9 @@ class CPU:
 
         address = 0
 
-        # For now, we've just hardcoded a program:
+        filename = sys.argv[1]
         
-        path = Path("examples/print8.ls8")
+        path = Path(f"examples/{filename}")
         
         with open(path, "r") as f:
             program = [int(line[:8], 2) for line in f.read().splitlines() if (line and (line[0] =='0' or line[0] =="1"))]
@@ -98,10 +103,10 @@ class CPU:
 
         while i != 1:
             i = self.ram_read()
-            if (i & 0b1111) == 0b0010:  # LDI
+            if i == LDI:  # LDI
                 reg = self.ram_read()
                 value = self.ram_read()
                 self.reg[reg] = value
-            elif (i & 0b1111) == 0b0111:  # PRN
+            elif i == PRN:  # PRN
                 reg = self.ram_read()
                 print(f"{self.reg[reg]}")
