@@ -30,6 +30,7 @@ MOD = 0xa4
 NOP = 0
 NOT = 0x69
 OR = 0xAA
+POP = 0x46
 PRA = 0x48
 PUSH = 0x45
 RET = 0x11
@@ -54,6 +55,7 @@ class CPU:
         self.im = 5
         self.IS = 6
         self.mar = 0
+        self.ir = 0
         
     @property
     def sp(self):
@@ -156,7 +158,7 @@ class CPU:
             % (
                 self.pc,
                 # self.fl,
-                # self.ie,
+                # self.ir,
                 self.ram_read(self.pc),
                 self.ram_read(self.pc + 1),
                 self.ram_read(self.pc + 2),
@@ -173,20 +175,37 @@ class CPU:
         reg_a = self.ram_read()
         reg_b = self.ram_read()
         self.alu('MUL', reg_a, reg_b)
+        
+    def do_push(self):
+        self.sp -= 1
+        reg = self.ram_read()
+        self.ram_load(self.sp, self.reg[reg])
+        
+    def do_pop(self):
+        reg = self.ram_read()
+        value = self.ram_read(self.sp)
+        self.reg[reg] = value
+        # print(self.ram[:0xf3])
+        self.sp += 1
+
 
     def run(self):
         """Run the CPU."""
 
-        i = 0
+        self.ir = 0
 
-        while i != 1:
-            i = self.ram_read()
-            if i == LDI:  # LDI
+        while self.ir != 1:
+            self.ir = self.ram_read()
+            if self.ir == LDI:  # LDI
                 reg = self.ram_read()
                 value = self.ram_read()
                 self.reg[reg] = value
-            elif i == PRN:  # PRN
+            elif self.ir == PRN:  # PRN
                 reg = self.ram_read()
                 print(f"{self.reg[reg]}")
-            elif i == MUL:
+            elif self.ir == MUL:
                 self.do_mul()
+            elif self.ir == PUSH:
+                self.do_push()
+            elif self.ir == POP:
+                self.do_pop()
