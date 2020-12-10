@@ -18,7 +18,6 @@ class CPU:
         self.reg = [0] * 8
         self.set_reg(7, 0xF4d)
         self.pc = 0
-        self.fl = 0
         
     def set_reg(self, reg, value):
         self.reg[reg] = value
