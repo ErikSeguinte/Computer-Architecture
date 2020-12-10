@@ -18,6 +18,33 @@ class CPU:
         self.reg = [0] * 8
         self.set_reg(7, 0xF4d)
         self.pc = 0
+        self.sp = 0xf3
+        self.im = 5
+        self.IS = 6
+        
+    @property
+    def sp(self):
+        return self.reg[7]
+    
+    @sp.setter
+    def sp(self, value):
+        self.reg[7] = value
+        
+    @property
+    def im(self):
+        return self.reg[5]
+
+    @im.setter
+    def im(self, value):
+        self.reg[5] = value
+
+    @property
+    def IS(self):
+        return self.reg[6]
+
+    @IS.setter
+    def IS(self, value):
+        self.reg[6] = value
         
     def set_reg(self, reg, value):
         self.reg[reg] = value
