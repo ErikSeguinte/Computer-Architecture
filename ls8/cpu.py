@@ -2,11 +2,43 @@
 
 import sys
 from pathlib import Path
+from typing import Awaitable
 
 LDI = 0b10000010 
 MUL = 0b10100010
 PRN = 0b01000111
 HLT = 0b00000001
+
+ADD = 0b10100000 
+AND = 0b10101000 
+CALL = 0b01010000 
+CMP = 0xA7
+DEC = 0x66
+DIV = 0xA3
+INC = 0x65
+INT = 0x52
+IRET = 0x13
+JEQ = 0x55
+JGE = 0x5a
+JGT = 0x57
+JLE = 0x59
+JLT = 0x58
+JMP = 0x54
+JNE = 0x56
+LD = 0x83
+MOD = 0xa4
+NOP = 0
+NOT = 0x69
+OR = 0xAA
+PRA = 0x48
+PUSH = 0x45
+RET = 0x11
+SHL = 0xac
+SHR = 0xAD
+ST = 0x84
+SUB = 0xa1
+XOR = 0xab
+
 
 
 class CPU:
@@ -21,6 +53,7 @@ class CPU:
         self.sp = 0xf3
         self.im = 5
         self.IS = 6
+        self.mar = 0
         
     @property
     def sp(self):
