@@ -16,9 +16,21 @@ class CPU:
         """Construct a new CPU."""
         self.ram = [0] * 256
         self.reg = [0] * 8
-        self.reg[7] = 0xF4
+        self.set_reg(7, 0xF4d)
         self.pc = 0
         self.fl = 0
+        
+    def set_reg(self, reg, value):
+        self.reg[reg] = value
+
+        a, b = self.reg[0], self.reg[1]
+
+        if a > b:
+            self.fl = 0b100
+        elif a < b:
+            self.fl = 0b010
+        else:
+            self.fl = 0b000
 
     def load(self):
         """Load a program into memory."""
