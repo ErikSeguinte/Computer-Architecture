@@ -168,6 +168,11 @@ class CPU:
             print(" %02X" % self.reg[i], end="")
 
         print()
+        
+    def do_mul(self):
+        reg_a = self.ram_read()
+        reg_b = self.ram_read()
+        self.alu('MUL', reg_a, reg_b)
 
     def run(self):
         """Run the CPU."""
@@ -184,6 +189,4 @@ class CPU:
                 reg = self.ram_read()
                 print(f"{self.reg[reg]}")
             elif i == MUL:
-                reg_a = self.ram_read()
-                reg_b = self.ram_read()
-                self.alu('MUL', reg_a, reg_b)
+                self.do_mul()
