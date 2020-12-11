@@ -187,6 +187,19 @@ class CPU:
         self.reg[reg] = value
         # print(self.ram[:0xf3])
         self.sp += 1
+        
+    def do_call(self):
+        new_loc = self.reg[self.pc]
+        self.pc += 1
+        self.sp -= 1
+        self.ram[self.sp] = self.pc
+        self.pc = new_loc
+        
+    def do_ret(self):
+        new_loc = self.ram[self.sp]
+        self.sp += 1
+        self.pc = new_loc
+        
 
 
     def run(self):
@@ -209,3 +222,7 @@ class CPU:
                 self.do_push()
             elif self.ir == POP:
                 self.do_pop()
+            elif self.ir == CALL:
+                self.do_call()
+            elif self.ir == RET:
+                self.do_ret()
