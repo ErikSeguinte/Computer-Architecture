@@ -189,10 +189,10 @@ class CPU:
         self.sp += 1
         
     def do_call(self):
-        new_loc = self.reg[self.pc]
-        self.pc += 1
+        reg = self.ram[self.pc]
+        new_loc = self.reg[reg]
         self.sp -= 1
-        self.ram[self.sp] = self.pc
+        self.ram[self.sp] = self.pc +1
         self.pc = new_loc
         
     def do_ret(self):
@@ -226,3 +226,5 @@ class CPU:
                 self.do_call()
             elif self.ir == RET:
                 self.do_ret()
+            elif self.ir == ADD:
+                self.alu("ADD", self.ram_read(), self.ram_read())
