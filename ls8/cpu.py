@@ -2,6 +2,7 @@
 
 import sys
 from pathlib import Path
+from time import time
 from typing import Awaitable
 
 LDI = 0b10000010
@@ -51,10 +52,14 @@ class CPU:
         self.set_reg(7, 0xF4D)
         self.pc = 0
         self.sp = 0xF3
-        self.im = 5
-        self.IS = 6
+        self.im = 1
         self.mar = 0
         self.ir = 0
+        self.fl = 0
+
+        # set Iterrupt vector
+        self.ram[0xff] = 17
+
 
     @property
     def sp(self):
@@ -190,12 +195,21 @@ class CPU:
         reg = self.ram_read()
         self.ram_load(self.sp, self.reg[reg])
 
+    def do_push_imm(self, value):
+        self.sp -= 1
+        self.ram[self.sp] = value
+
     def do_pop(self):
         reg = self.ram_read()
         value = self.ram_read(self.sp)
         self.reg[reg] = value
         # print(self.ram[:0xf3])
         self.sp += 1
+
+    def do_pop_imm(self):
+        value = self.ram[self.sp]
+        self.sp += 1
+        return value
 
     def do_call(self):
         reg = self.ram[self.pc]
@@ -214,12 +228,63 @@ class CPU:
         new_loc = self.reg[reg]
         self.pc = new_loc
 
+    def handle_interrupt(self,bit_tripped):
+        self.im = 0
+        self.IS &= ~(1<<(bit_tripped-1))
+        self.do_push_imm(self.pc)
+        self.do_push_imm(self.fl)
+        self.do_push_imm(self.reg[0])
+        self.do_push_imm(self.reg[1])
+        self.do_push_imm(self.reg[2])
+        self.do_push_imm(self.reg[3])
+        self.do_push_imm(self.reg[4])
+        self.do_push_imm(self.reg[5])
+        self.do_push_imm(self.reg[6])
+
+        self.pc = self.ram[0x100 - bit_tripped]
+
+    def do_iret(self):
+        self.reg[6] = self.do_pop_imm()
+        self.reg[5] = self.do_pop_imm()
+        self.reg[4] = self.do_pop_imm()
+        self.reg[3] = self.do_pop_imm()
+        self.reg[2] = self.do_pop_imm()
+        self.reg[1] = self.do_pop_imm()
+        self.reg[0] = self.do_pop_imm()
+
+        self.fl = self.do_pop_imm()
+
+        self.pc = self.do_pop_imm()
+
+        self.im = 1
+
+
+
+
+
+
+
     def run(self):
         """Run the CPU."""
 
         self.ir = 0
+        t = time()
 
         while self.ir != 1:
+            t2 = time()
+            if self.im and t2 >= t + 1:
+                self.IS ^= 1
+
+            maskedInterupts = self.im & self.IS
+
+            if maskedInterupts & 1:
+                #Timer interupt
+                self.t = time()
+                self.handle_interrupt(1)
+            elif maskedInterupts & 0b10: #Keyboard interupt
+                pass
+
+
             self.ir = self.ram_read()
             if self.ir == LDI:  # LDI
                 reg = self.ram_read()
@@ -253,4 +318,10 @@ class CPU:
                     self.do_jmp()
             elif self.ir == PRA:
                 val = self.ram_read()
-                print(val)
+                print(self.reg[val])
+            elif self.ir == IRET:
+                self.do_iret()
+            elif self.ir ==ST:
+                reg_a = self.ram_read()
+                reg_b = self.ram_read()
+                self.reg[reg_a] = self.reg[reg_b]
