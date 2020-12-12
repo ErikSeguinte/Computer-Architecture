@@ -251,3 +251,6 @@ class CPU:
             elif self.ir == JEQ:
                 if (self.fl & 0b001):
                     self.do_jmp()
+            elif self.ir == PRA:
+                val = self.ram_read()
+                print(val)
